@@ -1,4 +1,4 @@
-package main
+package dots
 
 import (
 	"crypto/tls"
@@ -68,14 +68,4 @@ func Run(ls net.Listener) {
 		}
 		go HandleAC(ac)
 	}
-}
-
-func main() {
-	cert := "/etc/letsencrypt/live/libsm.com-0001/fullchain.pem"
-	key := "/etc/letsencrypt/live/libsm.com-0001/privkey.pem"
-	ls, err := GetLisener(cert, key)
-	if err != nil {
-		panic(err)
-	}
-	Run(ls)
 }
