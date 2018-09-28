@@ -1,5 +1,7 @@
 language: go
 
+sudo: enabled
+
 go:
   - "1.11.x"
   - master
@@ -12,5 +14,3 @@ after_success:
 
 script:
   - go test -race -coverprofile=coverage.txt -covermode=atomic
-
-sudo: true
