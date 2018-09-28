@@ -9,7 +9,7 @@ import (
 )
 
 func MakeClient() (net.Conn, error) {
-	cert, err := tls.LoadX509KeyPair("certs/client.pem", "certs/client.key")
+	cert, err := tls.LoadX509KeyPair("testdata/certs/client.pem", "testdata/certs/client.key")
 	if err != nil {
 		fmt.Println("load key", err)
 		return nil, err
@@ -25,7 +25,7 @@ func MakeClient() (net.Conn, error) {
 	// state.NegotiatedProtocolIsMutual
 }
 
-func GetLisener(cert, key string) (net.Listener, error) {
+func GetListener(cert, key string) (net.Listener, error) {
 	var err error
 	config := &tls.Config{}
 	config.Certificates = make([]tls.Certificate, 1)
@@ -58,14 +58,33 @@ func HandleAC(conn net.Conn) {
 	io.Copy(conn, cli)
 }
 
-func Run(ls net.Listener) {
-	defer ls.Close()
-	for {
-		ac, err := ls.Accept()
-		if err != nil {
-			fmt.Println("accept error", err)
-			break
-		}
-		go HandleAC(ac)
-	}
+
+func doLs(ls net.Listener, c chan net.Conn) {
+    for {
+        ac, err := ls.Accept()
+        if err != nil {
+            ls.Close()
+            c<-nil
+            close(c)
+            return
+        }
+        c<-ac
+    }
+}
+
+
+func Run(ls net.Listener, cExit chan bool) {
+    cConn := make(chan net.Conn)
+    go doLs(ls, cConn)
+    for {
+        select {
+            case conn := <-cConn:
+                if conn == nil {
+                    return
+                }
+                go HandleAC(conn)
+            case <-cExit:
+                ls.Close()
+        }
+    }
 }
