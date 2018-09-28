@@ -12,3 +12,5 @@ after_success:
 
 script:
   - go test -race -coverprofile=coverage.txt -covermode=atomic
+
+sudo: true
