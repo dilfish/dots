@@ -44,7 +44,7 @@ func GetListener(cert, key string) (net.Listener, error) {
 	return ls, nil
 }
 
-func HandleAC(conn net.Conn) {
+func handleAC(conn net.Conn) {
 	defer conn.Close()
 	fmt.Println("time.Now", time.Now(), conn.RemoteAddr())
 	cli, err := MakeClient()
@@ -58,33 +58,31 @@ func HandleAC(conn net.Conn) {
 	io.Copy(conn, cli)
 }
 
-
 func doLs(ls net.Listener, c chan net.Conn) {
-    for {
-        ac, err := ls.Accept()
-        if err != nil {
-            ls.Close()
-            c<-nil
-            close(c)
-            return
-        }
-        c<-ac
-    }
+	for {
+		ac, err := ls.Accept()
+		if err != nil {
+			ls.Close()
+			c <- nil
+			close(c)
+			return
+		}
+		c <- ac
+	}
 }
 
-
 func Run(ls net.Listener, cExit chan bool) {
-    cConn := make(chan net.Conn)
-    go doLs(ls, cConn)
-    for {
-        select {
-            case conn := <-cConn:
-                if conn == nil {
-                    return
-                }
-                go HandleAC(conn)
-            case <-cExit:
-                ls.Close()
-        }
-    }
+	cConn := make(chan net.Conn)
+	go doLs(ls, cConn)
+	for {
+		select {
+		case conn := <-cConn:
+			if conn == nil {
+				return
+			}
+			go handleAC(conn)
+		case <-cExit:
+			ls.Close()
+		}
+	}
 }
