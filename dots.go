@@ -25,7 +25,7 @@ func MakeClient() (net.Conn, error) {
 	// state.NegotiatedProtocolIsMutual
 }
 
-func GetListener(cert, key string) (net.Listener, error) {
+func GetListener(cert, key, portStr string) (net.Listener, error) {
 	var err error
 	config := &tls.Config{}
 	config.Certificates = make([]tls.Certificate, 1)
@@ -35,7 +35,7 @@ func GetListener(cert, key string) (net.Listener, error) {
 		return nil, err
 	}
 	config.BuildNameToCertificate()
-	conn, err := net.Listen("tcp", ":853")
+	conn, err := net.Listen("tcp", portStr)
 	if err != nil {
 		fmt.Println("listen 853", err)
 		return nil, err

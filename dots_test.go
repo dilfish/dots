@@ -21,7 +21,7 @@ func sendDns() error {
 	m.Question[0] = dns.Question{"baidu.com.", dns.TypeA, dns.ClassINET}
 	c := new(dns.Client)
     c.Net = "tcp-tls"
-    conn, err := c.Dial("local.xn--oht.com:853")
+    conn, err := c.Dial("local.xn--oht.com:1853")
     if err != nil {
         println("dial", err)
         return err
@@ -40,7 +40,7 @@ func sendDns() error {
 }
 
 func TestGetLisener(t *testing.T) {
-	ls, err := GetListener("testdata/certs/full.pem", "testdata/certs/priv.pem")
+	ls, err := GetListener("testdata/certs/full.pem", "testdata/certs/priv.pem", "1853")
 	if err != nil {
 		t.Error("get ls err", err)
 	}
