@@ -4,6 +4,7 @@ import (
 	"github.com/miekg/dns"
 	"testing"
     "fmt"
+    "net"
 )
 
 func TestMakeClient(t *testing.T) {
@@ -39,15 +40,23 @@ func sendDns() error {
     return err
 }
 
+
+var gls net.Listener
+
 func TestGetLisener(t *testing.T) {
-	ls, err := GetListener("testdata/certs/full.pem", "testdata/certs/priv.pem", "1853")
+	ls, err := GetListener("testdata/certs/full.pem", "testdata/certs/priv.pem", ":1853")
 	if err != nil {
 		t.Error("get ls err", err)
 	}
-	defer ls.Close()
+    gls = ls
+}
+
+
+func TestRun(t *testing.T) {
+	defer gls.Close()
 	cExit := make(chan bool)
-	go Run(ls, cExit)
-	err = sendDns()
+	go Run(gls, cExit)
+	err := sendDns()
 	if err != nil {
 		t.Error("send dns err", err)
 	}
