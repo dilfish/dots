@@ -1,49 +1,44 @@
 package dots
 
 import (
-	"github.com/miekg/dns"
 	"testing"
-    "fmt"
     "net"
+    "os"
+    "github.com/miekg/dns"
+    "crypto/tls"
 )
 
 func TestMakeClient(t *testing.T) {
-	_, err := MakeClient()
+    err := os.Rename("testdata/certs/client.pem", "testdata/certs/client.back.pem")
+    if err != nil {
+        t.Error("pem does not exits")
+    }
+    _, err = MakeClient()
+    if err == nil {
+        t.Error("we could make client without cert")
+    }
+    err = os.Rename("testdata/certs/client.back.pem", "testdata/certs/client.pem")
+    if err != nil {
+        t.Error("we lost our certs")
+    }
+	_, err = MakeClient()
 	if err != nil {
 		t.Error("make client error", err)
 	}
-}
-
-func sendDns() error {
-	m := new(dns.Msg)
-	m.Id = dns.Id()
-	m.RecursionDesired = true
-	m.Question = make([]dns.Question, 1)
-	m.Question[0] = dns.Question{"baidu.com.", dns.TypeA, dns.ClassINET}
-	c := new(dns.Client)
-    c.Net = "tcp-tls"
-    conn, err := c.Dial("local.xn--oht.com:1853")
-    if err != nil {
-        println("dial", err)
-        return err
-    }
-    err = conn.WriteMsg(m)
-    if err != nil {
-        println("write", err)
-        return err
-    }
-    bt := make([]byte, 5400)
-    n, err := conn.Read(bt)
-    if err != nil {
-        fmt.Println("read", n, err, bt)
-    }
-    return err
 }
 
 
 var gls net.Listener
 
 func TestGetLisener(t *testing.T) {
+    _, err := GetListener("badcerts", "badcerts", "127.0.0.1:1853")
+    if err == nil {
+        t.Error("we could get ls without cert")
+    }
+    _, err = GetListener("testdata/certs/full.pem", "testdata/certs/priv.pem", "x")
+    if err == nil {
+        t.Error("we could get ls without port")
+    }
 	ls, err := GetListener("testdata/certs/full.pem", "testdata/certs/priv.pem", ":1853")
 	if err != nil {
 		t.Error("get ls err", err)
@@ -56,10 +51,20 @@ func TestRun(t *testing.T) {
 	defer gls.Close()
 	cExit := make(chan bool)
 	go Run(gls, cExit)
-    // travis can not do this
-	// err := sendDns()
-	// if err != nil {
-		// t.Error("send dns err", err)
-	// }
+    // copied from client_test.go // dns lib
+    m := new(dns.Msg)
+    m.SetQuestion("miek.nl.", dns.TypeSOA)
+    c := new(dns.Client)
+    c.Net = "tcp-tls"
+	c.TLSConfig = &tls.Config{
+		InsecureSkipVerify: true,
+	}
+	r, _, err := c.Exchange(m, "127.0.0.1:1853")
+	if err != nil {
+		t.Fatalf("failed to exchange: %v", err)
+	}
+	if r == nil {
+		t.Fatal("response is nil")
+	}
 	close(cExit)
 }
