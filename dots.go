@@ -1,3 +1,5 @@
+// Copyright 2018 Sean.ZH
+
 package dots
 
 import (
@@ -8,6 +10,7 @@ import (
 	"time"
 )
 
+// MakeClient create a tcp client
 func MakeClient() (net.Conn, error) {
 	cert, err := tls.LoadX509KeyPair("testdata/certs/client.pem", "testdata/certs/client.key")
 	if err != nil {
@@ -25,6 +28,7 @@ func MakeClient() (net.Conn, error) {
 	// state.NegotiatedProtocolIsMutual
 }
 
+// GetListener create an tls client
 func GetListener(cert, key, portStr string) (net.Listener, error) {
 	var err error
 	config := &tls.Config{}
@@ -71,6 +75,7 @@ func doLs(ls net.Listener, c chan net.Conn) {
 	}
 }
 
+// Run loops listen on tls
 func Run(ls net.Listener, cExit chan bool) {
 	cConn := make(chan net.Conn)
 	go doLs(ls, cConn)

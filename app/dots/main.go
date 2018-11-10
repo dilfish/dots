@@ -1,3 +1,5 @@
+// Copyright 2018 Sean.ZH
+
 package main
 
 import (
