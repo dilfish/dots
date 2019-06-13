@@ -13,7 +13,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-    cExit := make(chan bool)
-    defer close(cExit)
+	cExit := make(chan bool)
+	defer close(cExit)
 	dots.Run(ls, cExit)
 }
