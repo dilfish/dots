@@ -4,10 +4,11 @@ package dots
 
 import (
 	"crypto/tls"
-	"github.com/miekg/dns"
 	"net"
 	"os"
 	"testing"
+
+	"github.com/miekg/dns"
 )
 
 func TestMakeClient(t *testing.T) {
