@@ -1,6 +1,8 @@
 # dots
 dns over tls proxy
 
+this project has been replaced by dnslite https://github.com/dilfish/dnslite
+
 
 [![Build Status](https://travis-ci.org/dilfish/dots.svg?branch=master)](https://travis-ci.org/dilfish/dots)
 [![codecov](https://codecov.io/gh/dilfish/dots/branch/master/graph/badge.svg)](https://codecov.io/gh/dilfish/dots)
